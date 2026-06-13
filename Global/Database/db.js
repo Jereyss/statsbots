@@ -61,6 +61,37 @@ async function initializeDatabase() {
         )
     `);
 
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS allowed_channels JSONB DEFAULT '[]'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS bot_voice_channel_id TEXT DEFAULT ''`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS twitch_url TEXT DEFAULT 'https://twitch.tv/loki'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS activity_name TEXT DEFAULT 'Loki Istatistik Sistemi'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS log_channel_id TEXT DEFAULT ''`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS voice_categories JSONB DEFAULT '{}'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS filtered_users JSONB DEFAULT '[]'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS filtered_channels JSONB DEFAULT '[]'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS filtered_roles JSONB DEFAULT '[]'`);
+    await db.query(`ALTER TABLE guild_config ADD COLUMN IF NOT EXISTS staff_roles JSONB DEFAULT '[]'`);
+
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS voice_daily BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS voice_weekly BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS voice_monthly BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS voice_total BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS voice_channels JSONB DEFAULT '{}'`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS voice_categories JSONB DEFAULT '{}'`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS message_daily BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS message_weekly BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS message_monthly BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS message_total BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS message_channels JSONB DEFAULT '{}'`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS hourly_voice JSONB DEFAULT '[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]'`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS daily_history JSONB DEFAULT '[]'`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS inviter_id TEXT DEFAULT ''`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS invite_regular BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS invite_fake BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS invite_left BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS invite_bonus BIGINT DEFAULT 0`);
+    await db.query(`ALTER TABLE user_stats ADD COLUMN IF NOT EXISTS invite_total BIGINT DEFAULT 0`);
+
     console.log("[Neon DB] Tablolar basariyla olusturuldu/dogrulandi.");
 }
 
