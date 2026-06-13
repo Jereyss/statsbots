@@ -1,53 +1,47 @@
-import { Client, ActivityType } from "discord.js";
-import mongoose from "mongoose";
-import { joinVoiceChannel } from "@discordjs/voice";
-import moment from "moment";
+const { ActivityType } = require("discord.js");
+const { joinVoiceChannel } = require("@discordjs/voice");
+const { initializeDatabase } = require("../../Global/Database/db.js");
+const moment = require("moment");
 
-export default {
+module.exports = {
     name: "ready",
     once: true,
-    execute: async (client: any) => {
-        console.log(`[Loki BOT] ${client.user.tag} olarak giriş yapıldı!`);
+    execute: async (client) => {
+        console.log(`[Loki BOT] ${client.user.tag} olarak giris yapildi!`);
 
-        // MongoDB Bağlantısı (Client Konteyner üzerinden)
         try {
-            mongoose.set("strictQuery", true);
-            await mongoose.connect(client.config.MongoURI);
-            console.log("[MongoDB] Başarıyla veritabanına bağlanıldı!");
+            await initializeDatabase();
+            console.log("[Neon DB] Basariyla veritabanina baglandi!");
         } catch (err) {
-            console.error("[MongoDB] Bağlantı hatası:", err);
+            console.error("[Neon DB] Baglanti hatasi:", err);
         }
 
-        // Sunucu ayar kaydını Konteyner üzerinden alalım
         const guildConfig = await client.getSettings(client.config.GuildID);
 
-        // --- DAVET TAKIP SISTEMI ONBELLEK ILKLENDIRME ---
         client.invites = new Map();
         try {
             const guild = client.guilds.cache.get(client.config.GuildID);
             if (guild) {
                 const invites = await guild.invites.fetch();
                 const inviteCache = new Map();
-                invites.forEach((inv: any) => {
+                invites.forEach((inv) => {
                     inviteCache.set(inv.code, inv.uses);
                 });
                 client.invites.set(guild.id, inviteCache);
             }
         } catch (err) {
-            console.error("[Davet Takip] Davetler onbellege alinirken hata (Yetki eksik olabilir):", err);
+            console.error("[Davet Takip] Davetler onbellege alinirken hata:", err);
         }
 
-        // Durum (Presence) Ayarlama - Dinamik Twitch Yayında Bağlantısı
         client.user.setPresence({
-            activities: [{ 
-                name: guildConfig.activityName, 
-                type: ActivityType.Streaming, 
-                url: guildConfig.twitchURL // Veritabanından gelen Twitch linki
+            activities: [{
+                name: guildConfig.activityName,
+                type: ActivityType.Streaming,
+                url: guildConfig.twitchURL
             }],
             status: "online"
         });
 
-        // Otomatik Ses Kanalına Giriş Sistemi (Dinamik GuildConfig üzerinden)
         const voiceChannelId = guildConfig.botVoiceChannelID;
         if (voiceChannelId) {
             const channel = client.channels.cache.get(voiceChannelId);
@@ -60,25 +54,23 @@ export default {
                         selfMute: false,
                         selfDeaf: true
                     });
-                    console.log(`[Ses Bağlantısı] Bot başarıyla '${channel.name}' ses kanalına giriş yaptı ve yerleşti.`);
+                    console.log(`[Ses Baglantisi] Bot '${channel.name}' ses kanalina giris yapti.`);
                 } catch (err) {
-                    console.error("[Ses Bağlantısı] Ses kanalına girerken teknik hata oluştu:", err);
+                    console.error("[Ses Baglantisi] Ses kanalina girerken hata:", err);
                 }
             } else {
-                console.warn(`[Ses Bağlantısı] Kurulumda tanımlanan ses kanalı ID'si (${voiceChannelId}) bulunamadı veya geçerli değil!`);
+                console.warn(`[Ses Baglantisi] Ses kanali ID'si (${voiceChannelId}) bulunamadi!`);
             }
         }
 
-        // Günlük/Haftalık/Aylık Sıfırlama ve Tarih Taşıma Kontrolü
         let lastCheckedDate = moment().format("YYYY-MM-DD");
 
         setInterval(async () => {
             const currentDate = moment().format("YYYY-MM-DD");
             if (currentDate !== lastCheckedDate) {
-                console.log(`[Sistem] Gün değişti (${lastCheckedDate} -> ${currentDate}). İstatistikler taşınıyor ve sıfırlanıyor...`);
-                
+                console.log(`[Sistem] Gun degisti (${lastCheckedDate} -> ${currentDate}). Istatistikler sifirlanıyor...`);
+
                 try {
-                    // client.db konteyner modelini kullanıyoruz
                     const allStats = await client.db.find({
                         $or: [
                             { "voiceActive.daily": { $gt: 0 } },
@@ -97,9 +89,7 @@ export default {
                             messages: yesterdayMessages
                         });
 
-                        if (history.length > 30) {
-                            history.shift();
-                        }
+                        if (history.length > 30) history.shift();
 
                         stat.dailyHistory = history;
                         stat.voiceActive.daily = 0;
@@ -119,12 +109,12 @@ export default {
                         await stat.save();
                     }
 
-                    console.log(`[Sistem] ${allStats.length} kullanıcının istatistik devir işlemi başarıyla tamamlandı.`);
+                    console.log(`[Sistem] ${allStats.length} kullanicinin istatistik devir islemi tamamlandi.`);
                     lastCheckedDate = currentDate;
                 } catch (error) {
-                    console.error("[Sistem] İstatistik sıfırlama ve taşıma işleminde hata oluştu:", error);
+                    console.error("[Sistem] Istatistik sifirlama hata:", error);
                 }
             }
-        }, 1000 * 60 * 5); // Her 5 dakikada bir kontrol et
+        }, 1000 * 60 * 5);
     }
 };

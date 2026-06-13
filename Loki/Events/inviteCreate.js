@@ -1,8 +1,6 @@
-import { Invite } from "discord.js";
-
-export default {
+module.exports = {
     name: "inviteCreate",
-    execute: async (client: any, invite: Invite) => {
+    execute: async (client, invite) => {
         if (!invite.guild) return;
         const guildInvites = client.invites.get(invite.guild.id) || new Map();
         guildInvites.set(invite.code, invite.uses || 0);
