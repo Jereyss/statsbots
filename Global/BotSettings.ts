@@ -1,26 +1,29 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 export interface BotSettingsInterface {
-    Token: string;               // Discord Bot Token
-    MongoURI: string;            // MongoDB Bağlantı Adresi (URI)
-    Prefix: string;              // Komut Ön Eki (Prefix)
-    Developers: string[];        // Bot sahibinin/geliştiricilerin Discord ID'leri
-    GuildID: string;             // Ana sunucunun Discord ID'si
-    MessageMultiplier: number;   // Mesaj başına puan çarpanı
+    Token: string;
+    MongoURI: string;
+    Prefix: string;
+    Developers: string[];
+    GuildID: string;
+    MessageMultiplier: number;
     CanvasColors: {
-        primary: string;         // Neon Turkuaz
-        secondary: string;       // Neon Mor
-        background: string;      // Kart Arka Plan
-        cardBg: string;          // Buzlu Cam Panel Arka Plan
-        textColor: string;       // Ana Beyaz Yazı
-        subTextColor: string;    // Detay Gri Yazı
-        glowColor: string;       // Grafik Parlama Rengi
+        primary: string;
+        secondary: string;
+        background: string;
+        cardBg: string;
+        textColor: string;
+        subTextColor: string;
+        glowColor: string;
     };
 }
 
 export const BotSettings: BotSettingsInterface = {
-    Token: "",
-    MongoURI: "",
-    Prefix: ".",
-    Developers: ["770067487097749534"], // Bot sahibi veya yetkili geliştirici ID'leri
+    Token: process.env.DISCORD_TOKEN || "",
+    MongoURI: process.env.MONGODB_URI || "",
+    Prefix: process.env.BOT_PREFIX || ".",
+    Developers: ["770067487097749534"],
     GuildID: "1514703263688036553",
     MessageMultiplier: 15,
     CanvasColors: {
